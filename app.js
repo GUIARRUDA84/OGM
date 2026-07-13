@@ -106,15 +106,14 @@ function mostrarDataBr() {
 function cascata() {
   const org = $('#fOrgao').value;
   const lista = estado.tax[org] || [];
-  const a1 = $('#fAssunto1'), a2 = $('#fAssunto2');
+  const a1 = $('#fAssunto');
   if (!org) {
-    a1.disabled = a2.disabled = true;
-    a1.innerHTML = a2.innerHTML = '<option value="">Escolha o órgão primeiro</option>';
+    a1.disabled = true;
+    a1.innerHTML = '<option value="">Escolha o órgão primeiro</option>';
     return;
   }
-  a1.disabled = a2.disabled = false;
+  a1.disabled = false;
   preencher(a1, lista, 'Selecione…');
-  preencher(a2, lista, 'Nenhum');
 }
 
 /* ------------------------------------------------------------- registrar -- */
@@ -127,15 +126,12 @@ async function salvar() {
     SERVIDOR: servidor,
     FORMA_RECEBIMENTO: $('#fForma').value,
     ORGAO: $('#fOrgao').value,
-    ASSUNTO_1: $('#fAssunto1').value,
-    ASSUNTO_2: $('#fAssunto2').value,
-    QUANTIDADE: Math.max(1, parseInt($('#fQtd').value || '1', 10)),
+    ASSUNTO: $('#fAssunto').value,
     DESFECHO: $('#fDesfecho').value,
     OBSERVACAO: $('#fObs').value.trim()
   };
-  const faltando = ['DATA', 'FORMA_RECEBIMENTO', 'ORGAO', 'ASSUNTO_1', 'DESFECHO'].filter((c) => !d[c]);
+  const faltando = ['DATA', 'FORMA_RECEBIMENTO', 'ORGAO', 'ASSUNTO', 'DESFECHO'].filter((c) => !d[c]);
   if (faltando.length) return status('#statusReg', 'Preencha os campos obrigatórios.', 'erro');
-  if (d.ASSUNTO_2 === d.ASSUNTO_1) d.ASSUNTO_2 = '';
 
   $('#btnSalvar').disabled = true;
   status('#statusReg', 'Gravando…');
@@ -164,7 +160,6 @@ async function salvar() {
 
 function limpar(mantemData) {
   if (!mantemData) $('#fData').value = new Date().toISOString().slice(0, 10);
-  $('#fQtd').value = 1;
   $('#fForma').value = '';
   $('#fOrgao').value = '';
   $('#fDesfecho').value = '';
@@ -179,8 +174,8 @@ function limpar(mantemData) {
 function desenharUltimos() {
   const ult = estado.dados.slice(-8).reverse();
   $('#ultimos').innerHTML = ult.length
-    ? ult.map((r) => `<div class="item"><span><b>${esc(r.DATA)}</b> · ${esc(r.ORGAO)} — ${esc(r.ASSUNTO_1)}</span>
-        <span><span class="tag">${r.QUANTIDADE}</span> ${esc(r.SERVIDOR)}</span></div>`).join('')
+    ? ult.map((r) => `<div class="item"><span><b>${esc(r.DATA)}</b> · ${esc(r.ORGAO)} — ${esc(r.ASSUNTO)}</span>
+        <span class="tag">${esc(r.SERVIDOR)}</span></div>`).join('')
     : '<div class="vazio">Nenhum atendimento registrado ainda.</div>';
 }
 
@@ -202,15 +197,13 @@ function aplicarFiltros() {
     return true;
   });
 
-  const total = estado.filtrados.reduce((s, r) => s + (Number(r.QUANTIDADE) || 0), 0);
-  status('#statusCons', `${estado.filtrados.length} registros · ${total} atendimentos`);
+  status('#statusCons', `${estado.filtrados.length} atendimentos`);
 
   const tb = $('#tabela tbody');
   tb.innerHTML = estado.filtrados.length
     ? estado.filtrados.slice().reverse().map((r) => `<tr>
         <td>${esc(r.ID)}</td><td>${esc(r.DATA)}</td><td>${esc(r.SERVIDOR)}</td>
-        <td>${esc(r.FORMA_RECEBIMENTO)}</td><td>${esc(r.ORGAO)}</td><td>${esc(r.ASSUNTO_1)}</td>
-        <td>${esc(r.ASSUNTO_2)}</td><td class="num">${esc(r.QUANTIDADE)}</td>
+        <td>${esc(r.FORMA_RECEBIMENTO)}</td><td>${esc(r.ORGAO)}</td><td>${esc(r.ASSUNTO)}</td>
         <td>${esc(r.DESFECHO)}</td><td>${esc(r.OBSERVACAO)}</td>
         <td style="white-space:nowrap">
           <button class="btn neutro mini" data-edit="${esc(r.ID)}">Editar</button>
@@ -228,9 +221,7 @@ function editar(id) {
   $('#fForma').value = r.FORMA_RECEBIMENTO;
   $('#fOrgao').value = r.ORGAO;
   cascata();
-  $('#fAssunto1').value = r.ASSUNTO_1;
-  $('#fAssunto2').value = r.ASSUNTO_2 || '';
-  $('#fQtd').value = r.QUANTIDADE;
+  $('#fAssunto').value = r.ASSUNTO;
   $('#fDesfecho').value = r.DESFECHO;
   $('#fObs').value = r.OBSERVACAO || '';
   mostrarDataBr();
@@ -252,7 +243,7 @@ async function excluir(id) {
 }
 
 function baixarCsv() {
-  const cols = ['ID', 'DATA', 'MES', 'ANO', 'SERVIDOR', 'FORMA_RECEBIMENTO', 'ORGAO', 'ASSUNTO_1', 'ASSUNTO_2', 'QUANTIDADE', 'DESFECHO', 'OBSERVACAO'];
+  const cols = ['ID', 'DATA', 'MES', 'ANO', 'SERVIDOR', 'FORMA_RECEBIMENTO', 'ORGAO', 'ASSUNTO', 'DESFECHO', 'OBSERVACAO'];
   const linhas = [cols.join(';')].concat(
     estado.filtrados.map((r) => cols.map((c) => `"${String(r[c] ?? '').replace(/"/g, '""')}"`).join(';'))
   );
@@ -284,7 +275,7 @@ function agrupar(rows, campo) {
   rows.forEach((r) => {
     const k = r[campo];
     if (!k) return;
-    m[k] = (m[k] || 0) + (Number(r.QUANTIDADE) || 0);
+    m[k] = (m[k] || 0) + 1;
   });
   return Object.entries(m).sort((a, b) => b[1] - a[1]);
 }
@@ -325,19 +316,19 @@ function grafico(id, tipo, labels, valores, rotulo, horizontal) {
 
 function desenharPainel() {
   const rows = dadosPainel();
-  const total = rows.reduce((s, r) => s + (Number(r.QUANTIDADE) || 0), 0);
+  const total = rows.length;
   const dias = new Set(rows.map((r) => r.DATA)).size || 1;
 
   $('#kAtend').textContent = total.toLocaleString('pt-BR');
-  $('#kReg').textContent = rows.length.toLocaleString('pt-BR');
   $('#kOrg').textContent = new Set(rows.map((r) => r.ORGAO)).size;
+  $('#kAss').textContent = new Set(rows.map((r) => r.ASSUNTO).filter(Boolean)).size;
   $('#kDia').textContent = (total / dias).toFixed(1).replace('.', ',');
 
   // série mensal (ano-mês)
   const serie = {};
   rows.forEach((r) => {
     const k = `${r.ANO}-${String(r.MES).padStart(2, '0')}`;
-    serie[k] = (serie[k] || 0) + (Number(r.QUANTIDADE) || 0);
+    serie[k] = (serie[k] || 0) + 1;
   });
   const chaves = Object.keys(serie).sort();
   grafico('gSerie', 'line', chaves.map((k) => `${MESES[+k.split('-')[1]]}/${k.split('-')[0].slice(2)}`),
@@ -349,14 +340,7 @@ function desenharPainel() {
   const org = agrupar(rows, 'ORGAO').slice(0, 12);
   grafico('gOrgao', 'bar', org.map((x) => x[0].split(' - ')[0].slice(0, 28)), org.map((x) => x[1]), 'Atendimentos', true);
 
-  // assuntos: soma assunto 1 e assunto 2
-  const ass = {};
-  rows.forEach((r) => {
-    [r.ASSUNTO_1, r.ASSUNTO_2].filter(Boolean).forEach((a) => {
-      ass[a] = (ass[a] || 0) + (Number(r.QUANTIDADE) || 0);
-    });
-  });
-  const topAss = Object.entries(ass).sort((a, b) => b[1] - a[1]).slice(0, 12);
+  const topAss = agrupar(rows, 'ASSUNTO').slice(0, 12);
   grafico('gAssunto', 'bar', topAss.map((x) => x[0].slice(0, 34)), topAss.map((x) => x[1]), 'Atendimentos', true);
 
   const desf = agrupar(rows, 'DESFECHO');

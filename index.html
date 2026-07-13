@@ -46,18 +46,13 @@
 <section id="registrar" class="tela ativa">
   <div class="cartao">
     <h2>Novo atendimento</h2>
-    <p class="ajuda">Escolha o órgão e os assuntos aparecem já filtrados. Uma linha pode consolidar vários atendimentos idênticos — use o campo Quantidade.</p>
+    <p class="ajuda">Escolha o órgão e os assuntos aparecem já filtrados. Cada registro corresponde a um atendimento.</p>
 
     <div class="grade">
       <label class="campo">
         <span>Data <b>*</b></span>
         <input id="fData" type="date">
         <small id="fDataTexto" class="dica"></small>
-      </label>
-
-      <label class="campo">
-        <span>Quantidade de atendimentos <b>*</b></span>
-        <input id="fQtd" type="number" min="1" step="1" value="1" inputmode="numeric">
       </label>
 
       <label class="campo">
@@ -72,12 +67,7 @@
 
       <label class="campo largo">
         <span>Assunto <b>*</b></span>
-        <select id="fAssunto1" disabled><option value="">Escolha o órgão primeiro</option></select>
-      </label>
-
-      <label class="campo largo">
-        <span>Segundo assunto <i>(opcional)</i></span>
-        <select id="fAssunto2" disabled><option value="">Escolha o órgão primeiro</option></select>
+        <select id="fAssunto" disabled><option value="">Escolha o órgão primeiro</option></select>
       </label>
 
       <label class="campo largo">
@@ -125,7 +115,7 @@
       <table id="tabela">
         <thead><tr>
           <th>ID</th><th>Data</th><th>Servidor</th><th>Forma</th><th>Órgão</th>
-          <th>Assunto</th><th>2º assunto</th><th class="num">Qtd.</th><th>Desfecho</th><th>Observação</th><th></th>
+          <th>Assunto</th><th>Desfecho</th><th>Observação</th><th></th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -147,8 +137,8 @@
 
     <div class="kpis">
       <div class="kpi"><span class="kpi-num" id="kAtend">—</span><span class="kpi-rot">Atendimentos</span></div>
-      <div class="kpi"><span class="kpi-num" id="kReg">—</span><span class="kpi-rot">Registros lançados</span></div>
       <div class="kpi"><span class="kpi-num" id="kOrg">—</span><span class="kpi-rot">Órgãos demandados</span></div>
+      <div class="kpi"><span class="kpi-num" id="kAss">—</span><span class="kpi-rot">Assuntos distintos</span></div>
       <div class="kpi"><span class="kpi-num" id="kDia">—</span><span class="kpi-rot">Média por dia útil</span></div>
     </div>
 
