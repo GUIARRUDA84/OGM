@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pronto Atendimento — Ouvidoria-Geral do Município de Londrina</title>
+<meta name="description" content="Registro e análise dos atendimentos de pronto atendimento da Ouvidoria-Geral do Município de Londrina.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topo">
+  <div class="topo-in">
+    <div class="marca">
+      <span class="selo">OGM</span>
+      <div>
+        <h1 id="tituloApp">Pronto Atendimento</h1>
+        <p id="subtituloApp">Ouvidoria-Geral do Município de Londrina</p>
+      </div>
+    </div>
+    <div class="sessao">
+      <label class="campo compacto">
+        <span>Servidor</span>
+        <select id="servidorSessao"><option value="">Selecione…</option></select>
+      </label>
+      <label class="campo compacto">
+        <span>Chave de acesso</span>
+        <input id="chaveSessao" type="password" placeholder="para gravar" autocomplete="off">
+      </label>
+    </div>
+  </div>
+  <nav class="abas" role="tablist">
+    <button class="aba ativa" data-alvo="registrar" role="tab">Registrar</button>
+    <button class="aba" data-alvo="consultar" role="tab">Consultar</button>
+    <button class="aba" data-alvo="painel" role="tab">Painel</button>
+    <button class="aba" data-alvo="admin" role="tab">Administração</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ============================================================ REGISTRAR -->
+<section id="registrar" class="tela ativa">
+  <div class="cartao">
+    <h2>Novo atendimento</h2>
+    <p class="ajuda">Escolha o órgão e os assuntos aparecem já filtrados. Uma linha pode consolidar vários atendimentos idênticos — use o campo Quantidade.</p>
+
+    <div class="grade">
+      <label class="campo">
+        <span>Data <b>*</b></span>
+        <input id="fData" type="date">
+        <small id="fDataTexto" class="dica"></small>
+      </label>
+
+      <label class="campo">
+        <span>Quantidade de atendimentos <b>*</b></span>
+        <input id="fQtd" type="number" min="1" step="1" value="1" inputmode="numeric">
+      </label>
+
+      <label class="campo">
+        <span>Forma de recebimento <b>*</b></span>
+        <select id="fForma"><option value="">Selecione…</option></select>
+      </label>
+
+      <label class="campo largo">
+        <span>Órgão / Entidade <b>*</b></span>
+        <select id="fOrgao"><option value="">Selecione…</option></select>
+      </label>
+
+      <label class="campo largo">
+        <span>Assunto <b>*</b></span>
+        <select id="fAssunto1" disabled><option value="">Escolha o órgão primeiro</option></select>
+      </label>
+
+      <label class="campo largo">
+        <span>Segundo assunto <i>(opcional)</i></span>
+        <select id="fAssunto2" disabled><option value="">Escolha o órgão primeiro</option></select>
+      </label>
+
+      <label class="campo largo">
+        <span>Desfecho <b>*</b></span>
+        <select id="fDesfecho"><option value="">Selecione…</option></select>
+      </label>
+
+      <label class="campo total">
+        <span>Observação <i>(opcional)</i></span>
+        <textarea id="fObs" rows="2" placeholder="Anotação livre sobre o atendimento"></textarea>
+      </label>
+    </div>
+
+    <div class="acoes">
+      <button id="btnSalvar" class="btn primario">Salvar atendimento</button>
+      <button id="btnLimpar" class="btn neutro">Limpar</button>
+      <span id="statusReg" class="status"></span>
+    </div>
+  </div>
+
+  <div class="cartao">
+    <h2>Últimos registros</h2>
+    <div id="ultimos" class="lista-mini">Carregando…</div>
+  </div>
+</section>
+
+<!-- ============================================================ CONSULTAR -->
+<section id="consultar" class="tela">
+  <div class="cartao">
+    <h2>Consultar, editar e excluir</h2>
+    <div class="grade filtros">
+      <label class="campo"><span>De</span><input id="cDe" type="date"></label>
+      <label class="campo"><span>Até</span><input id="cAte" type="date"></label>
+      <label class="campo"><span>Órgão</span><select id="cOrgao"><option value="">Todos</option></select></label>
+      <label class="campo"><span>Servidor</span><select id="cServidor"><option value="">Todos</option></select></label>
+      <label class="campo"><span>Forma</span><select id="cForma"><option value="">Todas</option></select></label>
+      <label class="campo"><span>Busca livre</span><input id="cTexto" type="search" placeholder="assunto, observação, ID"></label>
+    </div>
+    <div class="acoes">
+      <button id="btnFiltrar" class="btn primario">Aplicar filtros</button>
+      <button id="btnCsv" class="btn neutro">Baixar CSV</button>
+      <span id="statusCons" class="status"></span>
+    </div>
+    <div class="tabela-wrap">
+      <table id="tabela">
+        <thead><tr>
+          <th>ID</th><th>Data</th><th>Servidor</th><th>Forma</th><th>Órgão</th>
+          <th>Assunto</th><th>2º assunto</th><th class="num">Qtd.</th><th>Desfecho</th><th>Observação</th><th></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================================== PAINEL -->
+<section id="painel" class="tela">
+  <div class="cartao">
+    <div class="painel-topo">
+      <h2>Painel analítico</h2>
+      <div class="grade filtros">
+        <label class="campo compacto"><span>Ano</span><select id="pAno"><option value="">Todos</option></select></label>
+        <label class="campo compacto"><span>Mês</span><select id="pMes"><option value="">Todos</option></select></label>
+        <label class="campo compacto"><span>Órgão</span><select id="pOrgao"><option value="">Todos</option></select></label>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><span class="kpi-num" id="kAtend">—</span><span class="kpi-rot">Atendimentos</span></div>
+      <div class="kpi"><span class="kpi-num" id="kReg">—</span><span class="kpi-rot">Registros lançados</span></div>
+      <div class="kpi"><span class="kpi-num" id="kOrg">—</span><span class="kpi-rot">Órgãos demandados</span></div>
+      <div class="kpi"><span class="kpi-num" id="kDia">—</span><span class="kpi-rot">Média por dia útil</span></div>
+    </div>
+
+    <div class="graficos">
+      <div class="graf"><h3>Evolução mensal</h3><canvas id="gSerie"></canvas></div>
+      <div class="graf"><h3>Forma de recebimento</h3><canvas id="gForma"></canvas></div>
+      <div class="graf largo"><h3>Órgãos mais demandados</h3><canvas id="gOrgao"></canvas></div>
+      <div class="graf largo"><h3>Assuntos mais frequentes</h3><canvas id="gAssunto"></canvas></div>
+      <div class="graf"><h3>Desfecho</h3><canvas id="gDesfecho"></canvas></div>
+      <div class="graf"><h3>Atendimentos por servidor</h3><canvas id="gServidor"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================== ADMINISTRAÇÃO -->
+<section id="admin" class="tela">
+  <div class="cartao">
+    <h2>Tabelas do sistema</h2>
+    <p class="ajuda">Tudo o que aparece nas listas do formulário é editado aqui. Exige chave de acesso. Desativar preserva o histórico; excluir da planilha, não.</p>
+
+    <div class="admin-grid">
+      <div>
+        <h3>Órgãos e assuntos</h3>
+        <div class="grade filtros">
+          <label class="campo"><span>Órgão</span><input id="aOrgao" list="listaOrgaos" placeholder="Digite ou escolha"><datalist id="listaOrgaos"></datalist></label>
+          <label class="campo"><span>Novo assunto</span><input id="aAssunto" placeholder="Ex.: FILA DE ESPERA"></label>
+        </div>
+        <button id="btnTaxAdd" class="btn primario">Incluir assunto</button>
+        <div class="tabela-wrap alto">
+          <table id="tabTax"><thead><tr><th>Órgão</th><th>Assunto</th><th>Ativo</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <div>
+        <h3>Servidores, formas e desfechos</h3>
+        <div class="grade filtros">
+          <label class="campo"><span>Tabela</span>
+            <select id="aTipo">
+              <option value="SERVIDOR">Servidores</option>
+              <option value="FORMA_RECEBIMENTO">Formas de recebimento</option>
+              <option value="DESFECHO">Desfechos</option>
+            </select>
+          </label>
+          <label class="campo"><span>Novo valor</span><input id="aValor" placeholder="Ex.: BALCÃO VIRTUAL"></label>
+        </div>
+        <button id="btnParAdd" class="btn primario">Incluir valor</button>
+        <div class="tabela-wrap alto">
+          <table id="tabPar"><thead><tr><th>Tabela</th><th>Valor</th><th>Ativo</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div class="acoes"><button id="btnAdminCarregar" class="btn neutro">Recarregar tabelas</button><span id="statusAdmin" class="status"></span></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="rodape">
+  <span>Controladoria-Geral do Município · Ouvidoria-Geral do Município de Londrina</span>
+  <span id="rodapeInfo"></span>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
