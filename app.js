@@ -12,6 +12,15 @@ const $$ = (s) => document.querySelectorAll(s);
 /* ------------------------------------------------------------------ util -- */
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+// Ordena alfabeticamente (pt-BR, ignora acento), com catch-all no fim.
+const AO_FIM = ['TELEFONE NÃO ATENDIDO/OUTROS Nº INFORMADOS', 'OUTROS'];
+const ordenar = (lista) => lista.slice().sort((a, b) => {
+  const ra = AO_FIM.indexOf(String(a).trim().toUpperCase()) + 1;
+  const rb = AO_FIM.indexOf(String(b).trim().toUpperCase()) + 1;
+  if (ra !== rb) return ra - rb;
+  return String(a).localeCompare(String(b), 'pt-BR', { sensitivity: 'base' });
+});
+
 function toast(msg, erro) {
   const t = $('#toast');
   t.textContent = msg;
@@ -30,10 +39,11 @@ const isoParaBr = (iso) => (iso ? iso.split('-').reverse().join('-') : '');
 const brParaIso = (br) => (br ? br.split('-').reverse().join('-') : '');
 const brParaData = (br) => { const [d, m, a] = String(br).split('-'); return new Date(+a, +m - 1, +d); };
 
-function preencher(sel, itens, primeira) {
+function preencher(sel, itens, primeira, semOrdenar) {
   const el = typeof sel === 'string' ? $(sel) : sel;
+  const lista = semOrdenar ? itens : ordenar(itens);
   el.innerHTML = `<option value="">${primeira}</option>` +
-    itens.map((i) => `<option value="${esc(i)}">${esc(i)}</option>`).join('');
+    lista.map((i) => `<option value="${esc(i)}">${esc(i)}</option>`).join('');
 }
 
 /* ------------------------------------------------------------------- API -- */
@@ -258,7 +268,7 @@ function baixarCsv() {
 function prepararPainel() {
   const anos = [...new Set(estado.dados.map((r) => r.ANO))].filter(Boolean).sort();
   preencher('#pAno', anos, 'Todos');
-  preencher('#pMes', MESES.slice(1).map((m, i) => `${i + 1} - ${m}`), 'Todos');
+  preencher('#pMes', MESES.slice(1).map((m, i) => `${i + 1} - ${m}`), 'Todos', true);
   desenharPainel();
 }
 
